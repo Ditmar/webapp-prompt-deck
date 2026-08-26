@@ -80,6 +80,11 @@ export async function authFetch(
 
   const doFetch = (accessToken: string) =>
     fetch(`${API_URL}${path}`, {
+      // Deck content can change via PUT without its URL changing, and some
+      // browsers may still be holding an entry cached under the old
+      // (pre-fix) long-lived Cache-Control this API used to send. Force a
+      // real network hit instead of ever trusting a locally cached copy.
+      cache: 'no-store',
       ...options,
       headers: {
         ...(options.headers as Record<string, string> | undefined),

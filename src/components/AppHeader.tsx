@@ -1,6 +1,6 @@
 import { logout } from '../lib/api';
-import { Button } from './ui/Button';
-import { LayersIcon, LogoutIcon } from './ui/icons';
+import { Button, LinkButton } from './ui/Button';
+import { LayersIcon, LogoutIcon, PlusIcon } from './ui/icons';
 
 export function AppHeader() {
   return (
@@ -14,10 +14,16 @@ export function AppHeader() {
             Mis diapositivas
           </span>
         </a>
-        <Button variant="ghost" size="sm" onClick={logout}>
-          <LogoutIcon className="h-4 w-4" />
-          Cerrar sesión
-        </Button>
+        <div className="flex items-center gap-2">
+          <LinkButton variant="primary" size="sm" href="/decks/new">
+            <PlusIcon className="h-4 w-4" />
+            Nueva diapositiva
+          </LinkButton>
+          <Button variant="ghost" size="sm" onClick={logout}>
+            <LogoutIcon className="h-4 w-4" />
+            Cerrar sesión
+          </Button>
+        </div>
       </div>
     </header>
   );

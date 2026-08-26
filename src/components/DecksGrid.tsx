@@ -4,7 +4,15 @@ import { Card } from './ui/Card';
 import { Button, LinkButton } from './ui/Button';
 import { Spinner } from './ui/Spinner';
 import { Alert } from './ui/Alert';
-import { CalendarIcon, EyeIcon, InboxIcon, LinkIcon, PencilIcon, TrashIcon } from './ui/icons';
+import {
+  CalendarIcon,
+  EyeIcon,
+  InboxIcon,
+  LinkIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+} from './ui/icons';
 
 interface DeckSummary {
   id: string;
@@ -124,6 +132,10 @@ export function DecksGrid() {
           <p className="text-sm text-slate-400">
             Todavía no generaste ninguna diapositiva.
           </p>
+          <LinkButton variant="primary" size="sm" href="/decks/new">
+            <PlusIcon className="h-4 w-4" />
+            Crear la primera
+          </LinkButton>
         </Card>
       )}
 
