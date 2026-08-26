@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { authFetch } from '../lib/api';
+import { setIframeHtml } from '../lib/iframe';
 import { Card } from './ui/Card';
 import { Spinner } from './ui/Spinner';
 import { Alert } from './ui/Alert';
@@ -27,7 +28,7 @@ export function DeckViewer() {
           return;
         }
         const html = await res.text();
-        if (frameRef.current) frameRef.current.srcdoc = html;
+        if (frameRef.current) setIframeHtml(frameRef.current, html);
       })
       .catch(() => setError('No se pudo contactar la API.'))
       .finally(() => setLoading(false));

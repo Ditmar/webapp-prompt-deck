@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { authFetch } from '../lib/api';
+import { setIframeHtml } from '../lib/iframe';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Alert } from './ui/Alert';
@@ -30,7 +31,7 @@ export function DeckEditor() {
     try {
       const res = await authFetch(`/api/deck/${userId}/${slug}`);
       if (res.ok && frameRef.current) {
-        frameRef.current.srcdoc = await res.text();
+        setIframeHtml(frameRef.current, await res.text());
       }
     } finally {
       setPreviewLoading(false);

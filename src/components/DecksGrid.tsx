@@ -30,6 +30,7 @@ export function DecksGrid() {
   const [decks, setDecks] = useState<DeckSummary[] | null>(null);
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
 
   async function load() {
     setError('');
@@ -62,6 +63,29 @@ export function DecksGrid() {
       setDecks(prev => (prev ? prev.filter(d => d.id !== deck.id) : prev));
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handleOpenDeck(deck: DeckSummary) {
+    const { userId, slug } = parseUrl(deck.url);
+    // Open the tab synchronously (before any await) so browsers don't treat it as a blocked popup.
+    const win = window.open('', '_blank');
+    setOpeningId(deck.id);
+    try {
+      const res = await authFetch(`/api/deck/${userId}/${slug}`);
+      if (!res.ok) {
+        setError('No se pudo abrir la diapositiva.');
+        win?.close();
+        return;
+      }
+      const html = await res.text();
+      const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+      if (win) win.location.href = blobUrl;
+    } catch {
+      setError('No se pudo contactar la API.');
+      win?.close();
+    } finally {
+      setOpeningId(null);
     }
   }
 
@@ -117,16 +141,20 @@ export function DecksGrid() {
                   {deck.title}
                 </h2>
 
-                <a
-                  href={`${API_URL}${deck.url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => handleOpenDeck(deck)}
+                  disabled={openingId === deck.id}
                   title="Abrir diapositiva en una ventana nueva"
-                  className="flex items-center gap-1.5 overflow-hidden rounded-md border border-white/10 bg-slate-950/50 px-2.5 py-1.5 text-xs text-slate-500 transition-colors hover:border-indigo-400/40 hover:text-indigo-300"
+                  className="flex items-center gap-1.5 overflow-hidden rounded-md border border-white/10 bg-slate-950/50 px-2.5 py-1.5 text-xs text-slate-500 transition-colors hover:border-indigo-400/40 hover:text-indigo-300 disabled:opacity-60"
                 >
-                  <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                  {openingId === deck.id ? (
+                    <Spinner className="h-3.5 w-3.5 shrink-0" />
+                  ) : (
+                    <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+                  )}
                   <span className="truncate font-mono">{`${API_URL}${deck.url}`}</span>
-                </a>
+                </button>
 
                 <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-3.5">
                   <span className="flex items-center gap-1.5 text-xs text-slate-500">
