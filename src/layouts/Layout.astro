@@ -1,0 +1,40 @@
+---
+import '../styles/global.css';
+import { AppHeader } from '../components/AppHeader';
+
+interface Props {
+  title: string;
+  wide?: boolean;
+}
+const { title, wide = false } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} · Decks</title>
+  </head>
+  <body class="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased">
+    <div
+      class="pointer-events-none fixed inset-0 overflow-hidden"
+      aria-hidden="true"
+    >
+      <div
+        class="absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-indigo-600/20 blur-[120px]"
+      >
+      </div>
+      <div
+        class="absolute bottom-0 right-0 h-[28rem] w-[28rem] rounded-full bg-violet-600/10 blur-[120px]"
+      >
+      </div>
+    </div>
+
+    <div class="relative">
+      <AppHeader client:load />
+      <main class={`mx-auto px-6 py-10 ${wide ? 'max-w-[100rem]' : 'max-w-6xl'}`}>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
