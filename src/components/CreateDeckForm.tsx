@@ -15,6 +15,7 @@ import {
 } from './ui/icons';
 
 type BackgroundAnimation = 'none' | 'gradient' | 'parallax';
+type SlideTransition = 'slide' | 'fade' | 'convex' | 'concave' | 'zoom' | 'none';
 
 const BACKGROUND_OPTIONS: {
   value: BackgroundAnimation;
@@ -27,6 +28,15 @@ const BACKGROUND_OPTIONS: {
   { value: 'parallax', label: 'Imagen parallax', hint: 'Tu propia imagen de fondo', icon: ImageIcon },
 ];
 
+const TRANSITION_OPTIONS: { value: SlideTransition; label: string }[] = [
+  { value: 'slide', label: 'Deslizar' },
+  { value: 'fade', label: 'Desvanecer' },
+  { value: 'zoom', label: 'Zoom' },
+  { value: 'convex', label: 'Convexa' },
+  { value: 'concave', label: 'Cóncava' },
+  { value: 'none', label: 'Ninguna' },
+];
+
 function cn(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
@@ -35,7 +45,9 @@ export function CreateDeckForm() {
   const [prompt, setPrompt] = useState('');
   const [totalSlides, setTotalSlides] = useState('');
   const [backgroundAnimation, setBackgroundAnimation] = useState<BackgroundAnimation>('none');
+  const [transition, setTransition] = useState<SlideTransition>('slide');
   const [parallaxImageUrl, setParallaxImageUrl] = useState('');
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +106,7 @@ export function CreateDeckForm() {
           totalSlides: totalSlides ? Number(totalSlides) : undefined,
           backgroundAnimation,
           parallaxImageUrl: backgroundAnimation === 'parallax' ? parallaxImageUrl : undefined,
+          transition,
         }),
       });
       if (!res.ok) {
@@ -182,12 +195,84 @@ export function CreateDeckForm() {
           </div>
         </div>
 
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-slate-200">Transición entre diapositivas</span>
+          <div className="flex flex-wrap gap-2">
+            {TRANSITION_OPTIONS.map(opt => {
+              const selected = transition === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setTransition(opt.value)}
+                  className={cn(
+                    'rounded-full border px-3.5 py-1.5 text-sm transition-colors disabled:opacity-60',
+                    selected
+                      ? 'border-indigo-400/60 bg-indigo-500/10 text-indigo-300 ring-2 ring-indigo-400/30'
+                      : 'border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20 hover:bg-white/[0.05]'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {backgroundAnimation === 'parallax' && (
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-slate-200">Imagen de fondo</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-200">Imagen de fondo</span>
+              <div className="flex rounded-lg border border-white/10 p-0.5 text-xs">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setImageMode('upload')}
+                  className={cn(
+                    'rounded-md px-2.5 py-1 transition-colors',
+                    imageMode === 'upload' ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:text-slate-200'
+                  )}
+                >
+                  Subir archivo
+                </button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setImageMode('url')}
+                  className={cn(
+                    'rounded-md px-2.5 py-1 transition-colors',
+                    imageMode === 'url' ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:text-slate-200'
+                  )}
+                >
+                  Pegar URL
+                </button>
+              </div>
+            </div>
+
             {uploadError && <Alert>{uploadError}</Alert>}
 
-            {!parallaxImageUrl ? (
+            {imageMode === 'url' ? (
+              <div className="flex flex-col gap-2">
+                <Input
+                  type="url"
+                  placeholder="https://..."
+                  value={parallaxImageUrl}
+                  disabled={submitting}
+                  onChange={e => setParallaxImageUrl(e.target.value)}
+                />
+                {parallaxImageUrl && (
+                  <div className="overflow-hidden rounded-xl border border-white/10">
+                    <img
+                      src={parallaxImageUrl}
+                      alt="Fondo parallax elegido"
+                      className="h-40 w-full object-cover"
+                      onError={e => (e.currentTarget.style.display = 'none')}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : !parallaxImageUrl ? (
               <button
                 type="button"
                 disabled={uploading || submitting}

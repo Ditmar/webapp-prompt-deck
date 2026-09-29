@@ -87,7 +87,13 @@ export function DeckEditor() {
         body: JSON.stringify(parsed),
       });
       if (!res.ok) {
-        setError('No se pudo guardar el deck.');
+        setError(
+          res.status === 403
+            ? 'No tenés permiso para editar este deck (pertenece a otro usuario).'
+            : res.status === 404
+              ? 'El deck ya no existe.'
+              : `No se pudo guardar el deck (HTTP ${res.status}).`
+        );
         return;
       }
       const result = await res.json();
@@ -95,6 +101,8 @@ export function DeckEditor() {
       setSaved(true);
       setIssues(result.issues ?? []);
       await loadPreview(target.userId, target.slug);
+    } catch {
+      setError('No se pudo contactar la API (revisá CORS_ALLOWED_ORIGINS y PUBLIC_API_URL).');
     } finally {
       setSaving(false);
     }
